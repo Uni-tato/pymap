@@ -109,13 +109,19 @@ class World:
         
         # show_points(ordered_points, num_points_x, num_points_y)
         
-        point_sets = [(ordered_points, num_points_x / 2, num_points_y / 2)]
+        point_sets = [(ordered_points, num_points_x / 2, num_points_y / 2, 1.0)]
         # n_cuts = random.randint(3, 8)
         n_cuts = 5
         # Cut the field into n pieces
         for _ in range(n_cuts):
-            # select a point_set
-            i = random.randint(0, len(point_sets) - 1)
+            # Select a point_set weighted by the number of points
+            # Total weight is 1
+            r = random.random()
+            i = 0
+            while r > point_sets[i][3]:
+                r -= point_sets[i][3]
+                i += 1
+            
             point_set = point_sets.pop(i)
             # First find a random line that cuts the field roughly in half
             # equation of a line: y = mx + b
@@ -130,7 +136,6 @@ class World:
             # Create a second similar line
             angle2 = angle + pi/2 + random.random()*pi/4
             m2 = tan(angle2)
-            # b2 = center[1]+random.random()*2-1 - m2 * (center[0] + random.random()*2-1)
             b2 = center[1] - m2 * center[0]
             line2 = lambda x: m2 * x + b2
             
@@ -166,12 +171,15 @@ class World:
             lhs_center = (lhs_center[0] / len(lhs), lhs_center[1] / len(lhs))
             rhs_center = (rhs_center[0] / len(rhs), rhs_center[1] / len(rhs))
             
-            point_sets.append((lhs, *lhs_center))
-            point_sets.append((rhs, *rhs_center))
+            lhs_weight = len(lhs) / len(ordered_points)
+            rhs_weight = len(rhs) / len(ordered_points)
+            
+            point_sets.append((lhs, *lhs_center, lhs_weight))
+            point_sets.append((rhs, *rhs_center, rhs_weight))
         
         # Now turn each piece into a continent
         n = 0
-        for point_set, center_x, center_y in point_sets: # TODO: use the centers to correct coordinates
+        for point_set, center_x, center_y, weight in point_sets: # TODO: use the centers to correct coordinates
             # need to standardise the points
             # x and y are between -1 and 1
             # size should be scaled to the size of the world
