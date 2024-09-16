@@ -1,0 +1,2 @@
+WORLD_WIDTH = 40_000 # km
+WORLD_HEIGHT = 20_000 # km
