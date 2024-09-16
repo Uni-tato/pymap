@@ -56,7 +56,7 @@ class World:
             return self.center_distance(other) - other.r
     
     
-    def continental_drift_generation(self): # TODO: solve the "hard edges" problem, also try use non straight lines for the cuts (maybe use 2 cuts)
+    def continental_drift_generation(self):
         """ Generates continents by simulating continental drift."""
         
         # Generate a field of points
@@ -109,9 +109,13 @@ class World:
         
         # show_points(ordered_points, num_points_x, num_points_y)
         
-        point_sets = [(ordered_points, num_points_x / 2, num_points_y / 2, 1.0)]
-        # n_cuts = random.randint(3, 8)
-        n_cuts = 5
+        point_sets = [(
+            ordered_points, # points
+            num_points_x / 2, num_points_y / 2, # center
+            1.0, # weight
+            0.0, 0.0 # drift
+            )]
+        n_cuts = random.randint(3, 8)
         # Cut the field into n pieces
         for _ in range(n_cuts):
             # Select a point_set weighted by the number of points
@@ -174,16 +178,21 @@ class World:
             lhs_weight = len(lhs) / len(ordered_points)
             rhs_weight = len(rhs) / len(ordered_points)
             
-            point_sets.append((lhs, *lhs_center, lhs_weight))
-            point_sets.append((rhs, *rhs_center, rhs_weight))
+            lhs_drift = (
+                (lhs_center[0] - point_set[1]) * lhs_weight * n_cuts,
+                (lhs_center[1] - point_set[2]) * lhs_weight * n_cuts
+            )
+            rhs_drift = (
+                (rhs_center[0] - point_set[1]) * rhs_weight * n_cuts,
+                (rhs_center[1] - point_set[2]) * rhs_weight * n_cuts
+            )
+            
+            point_sets.append((lhs, *lhs_center, lhs_weight, *lhs_drift))
+            point_sets.append((rhs, *rhs_center, rhs_weight, *rhs_drift))
         
         # Now turn each piece into a continent
         n = 0
-        for point_set, center_x, center_y, weight in point_sets: # TODO: use the centers to correct coordinates
-            # need to standardise the points
-            # x and y are between -1 and 1
-            # size should be scaled to the size of the world
-            # show_points(point_set, num_points_x, num_points_y)
+        for point_set, center_x, center_y, _, drift_x, drift_y in point_sets:
             
             center_x = (center_x-num_points_x/2)/num_points_x
             center_y = (center_y-num_points_y/2)/num_points_y
@@ -200,9 +209,12 @@ class World:
             # calculate drift
             drift_factor = (0.5*WORLD_WIDTH, 0.5*WORLD_HEIGHT)
             # move the continent in the direction of it's center relative to the center of the world
+            drift_x = drift_x/num_points_x * WORLD_WIDTH
+            drift_y = drift_y/num_points_y * WORLD_HEIGHT
+            drift_factor = 1, 0.5
             pos = (
-                WORLD_WIDTH//2 + center_x * drift_factor[0],
-                WORLD_HEIGHT//2 + center_y * drift_factor[1]
+                WORLD_WIDTH//2 + drift_x * drift_factor[0],
+                WORLD_HEIGHT//2 + drift_y * drift_factor[1]
                 )
             
             self.add_continent(c, pos)
