@@ -117,7 +117,7 @@ class World:
             )]
         n_cuts = random.randint(3, 8)
         # Cut the field into n pieces
-        for _ in range(n_cuts):
+        for cut_number in range(n_cuts):
             # Select a point_set weighted by the number of points
             # Total weight is 1
             r = random.random()
@@ -179,12 +179,12 @@ class World:
             rhs_weight = len(rhs) / len(ordered_points)
             
             lhs_drift = (
-                (lhs_center[0] - point_set[1]) * lhs_weight * n_cuts,
-                (lhs_center[1] - point_set[2]) * lhs_weight * n_cuts
+                (lhs_center[0] - point_set[1]) * n_cuts * 1/(cut_number+1),
+                (lhs_center[1] - point_set[2]) * n_cuts * 1/(cut_number+1)
             )
             rhs_drift = (
-                (rhs_center[0] - point_set[1]) * rhs_weight * n_cuts,
-                (rhs_center[1] - point_set[2]) * rhs_weight * n_cuts
+                (rhs_center[0] - point_set[1]) * n_cuts * 1/(cut_number+1),
+                (rhs_center[1] - point_set[2]) * n_cuts * 1/(cut_number+1)
             )
             
             point_sets.append((lhs, *lhs_center, lhs_weight, *lhs_drift))
@@ -207,7 +207,7 @@ class World:
             c = Continent(str(n:=n+1), WORLD_HEIGHT//4, p)
             
             # calculate drift
-            drift_factor = (0.5*WORLD_WIDTH, 0.5*WORLD_HEIGHT)
+            drift_factor = (0.25*WORLD_WIDTH, 0.25*WORLD_HEIGHT)
             # move the continent in the direction of it's center relative to the center of the world
             drift_x = drift_x/num_points_x * WORLD_WIDTH
             drift_y = drift_y/num_points_y * WORLD_HEIGHT
