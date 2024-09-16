@@ -6,12 +6,12 @@ from consts import *
 
 w = World('Testworld')
 
-c1 = Continent('Testmerica', 2200)
+# c1 = Continent('Testmerica', 2200)
 # c2 = Continent('Testope', 1800)
 # c3 = Continent('Testralia', 1600)
-# c4 = Continent('Testfrica', 3100)
+c4 = Continent('Testfrica', 3100)
 
-w.add_continent(c1)
+# w.add_continent(c1)
 # w.add_continent(c2)
 # w.add_continent(c3)
 # w.add_continent(c4)
@@ -22,6 +22,7 @@ w.add_continent(c1)
 
 w = World('Testworld')
 w.continental_drift_generation()
+# w.add_continent(c4, (WORLD_WIDTH, WORLD_HEIGHT//2))
 mask, height_map = w.mask_and_height_map()
 
 image = Image.new('RGB', mask.size, (0, 0, 0))

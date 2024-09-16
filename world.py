@@ -243,9 +243,15 @@ class World:
             x, y = coordinates
             x = int(x / scale)
             y = int(y / scale)
-            r = int(continent.radius / scale)
+            r = int(continent.radius / scale) # Is this still correct? I've changed a lot, TODO: check
             mask.paste(m, (x - r, y - r), m)
             height_map.paste(h_map, (x - r, y - r), h_map)
+            
+            # Continents can sit on the edge of the map, so we need to draw them extra times to ensure they loop around
+            mask.paste(m, (x - r + width, y - r), m)
+            height_map.paste(h_map, (x - r + width, y - r), h_map)
+            mask.paste(m, (x - r - width, y - r), m)
+            height_map.paste(h_map, (x - r - width, y - r), h_map)
         
         return mask, height_map
             
