@@ -110,7 +110,8 @@ class World:
         # show_points(ordered_points, num_points_x, num_points_y)
         
         point_sets = [(ordered_points, num_points_x / 2, num_points_y / 2)]
-        n_cuts = random.randint(3, 8)
+        # n_cuts = random.randint(3, 8)
+        n_cuts = 5
         # Cut the field into n pieces
         for _ in range(n_cuts):
             # select a point_set
@@ -127,33 +128,41 @@ class World:
             b = center[1] - m * center[0]
             line = lambda x: m * x + b
             # Create a second similar line
-            angle2 = angle + random.gauss(0, pi/8)
+            angle2 = angle + pi/2 + random.random()*pi/4
             m2 = tan(angle2)
-            b2 = center[1]+random.random()*2-1 - m2 * (center[0] + random.random()*2-1)
+            # b2 = center[1]+random.random()*2-1 - m2 * (center[0] + random.random()*2-1)
+            b2 = center[1] - m2 * center[0]
             line2 = lambda x: m2 * x + b2
             
             # show the line
             # image = Image.new('L', (num_points_x * 100, num_points_y * 100), (0,))
             # draw = ImageDraw.Draw(image)
-            # draw.line((0, line(0)*100, num_points_x*100, line(num_points_x)*100), fill=(255,))
-            # draw.line((0, line2(0)*100, num_points_x*100, line2(num_points_x)*100), fill=(255,))
+            # draw.line((0, line(0)*100, num_points_x*100, line(num_points_x)*100), fill=(255,), width=3)
+            # draw.line((0, line2(0)*100, num_points_x*100, line2(num_points_x)*100), fill=(255,), width=3)
             # image.show()
             
             # Now split the field into two sets of points
             lhs, rhs = [], []
             lhs_center = (0, 0)
             rhs_center = (0, 0)
+            direction1 = 1 if random.random() > 0.5 else -1
+            direction2 = 1 if random.random() > 0.5 else -1
             for point in point_set[0]:
-                if point.y > line(point.x) and point.y > line2(point.x):
+                if (
+                    point.y*direction1 > line(point.x)*direction1 and
+                    point.y*direction2 > line2(point.x)*direction2
+                ):
                     lhs.append(point)
                     lhs_center = (lhs_center[0] + point.x, lhs_center[1] + point.y)
                 else:
                     rhs.append(point)
                     rhs_center = (rhs_center[0] + point.x, rhs_center[1] + point.y)
+                    
             if len(lhs) == 0 or len(rhs) == 0:
                 # This cut was not useful, try again
                 point_sets.append(point_set)
                 continue
+            
             lhs_center = (lhs_center[0] / len(lhs), lhs_center[1] / len(lhs))
             rhs_center = (rhs_center[0] / len(rhs), rhs_center[1] / len(rhs))
             
