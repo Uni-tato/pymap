@@ -179,12 +179,12 @@ class World:
             rhs_weight = len(rhs) / len(ordered_points)
             
             lhs_drift = (
-                (lhs_center[0] - point_set[1]) * n_cuts * 1/(cut_number+1),
-                (lhs_center[1] - point_set[2]) * n_cuts * 1/(cut_number+1)
+                (lhs_center[0] - point_set[1]) * cut_number/(n_cuts+1),
+                (lhs_center[1] - point_set[2]) * cut_number/(n_cuts+1)
             )
             rhs_drift = (
-                (rhs_center[0] - point_set[1]) * n_cuts * 1/(cut_number+1),
-                (rhs_center[1] - point_set[2]) * n_cuts * 1/(cut_number+1)
+                (rhs_center[0] - point_set[1]) * cut_number/(n_cuts+1),
+                (rhs_center[1] - point_set[2]) * cut_number/(n_cuts+1)
             )
             
             point_sets.append((lhs, *lhs_center, lhs_weight, *lhs_drift))
@@ -194,28 +194,28 @@ class World:
         n = 0
         for point_set, center_x, center_y, _, drift_x, drift_y in point_sets:
             
-            center_x = (center_x-num_points_x/2)/num_points_x
-            center_y = (center_y-num_points_y/2)/num_points_y
+            # scale the center between -0.9 and 0.9
+            center_x = (2*center_x/num_points_x-1) * 0.9
+            center_y = (2*center_y/num_points_y-1) * 0.9
             
             p = []
-            for point in point_set: # scale the points between -0.9 and 0.9
-                p.append((
-                    (2*point.x/num_points_x-1) * 0.9,
-                    (2*point.y/num_points_y-1) * 0.9,
-                    2*point.r/(num_points_x+num_points_y)
-                    ))
+            for point in point_set:
+                # scale the points between -0.9 and 0.9
+                x = (2*point.x/num_points_x-1) * 0.9
+                y = (2*point.y/num_points_y-1) * 0.9
+                r = 2*point.r/(num_points_x+num_points_y)
+                # Correct for the center of the continent
+                x -= center_x
+                y -= center_y
+                p.append((x,y,r))
             c = Continent(str(n:=n+1), WORLD_HEIGHT//4, p)
             
-            # calculate drift
-            drift_factor = (0.25*WORLD_WIDTH, 0.25*WORLD_HEIGHT)
-            # move the continent in the direction of it's center relative to the center of the world
-            drift_x = drift_x/num_points_x * WORLD_WIDTH
-            drift_y = drift_y/num_points_y * WORLD_HEIGHT
-            drift_factor = 1, 0.5
+            drift_factor = 0.5, 0.3
+            
             pos = (
-                WORLD_WIDTH//2 + drift_x * drift_factor[0],
-                WORLD_HEIGHT//2 + drift_y * drift_factor[1]
-                )
+                (1 + drift_factor[0]*center_x)*WORLD_WIDTH//2 + center_x*WORLD_HEIGHT//4,
+                (1 + drift_factor[1]*center_y)*WORLD_HEIGHT//2 + center_y*WORLD_HEIGHT//4
+            )
             
             self.add_continent(c, pos)
         
@@ -235,6 +235,8 @@ class World:
         height = int(WORLD_HEIGHT / scale)
         mask = Image.new('LA', (width, height), (0,))
         height_map = Image.new('LA', (width, height), (0,))
+        # mask = Image.new('RGB', (width, height), (0, 0, 0))
+        # height_map = Image.new('RGB', (width, height), (0, 0, 0))
         
         # Draw each continent
         for continent, coordinates in self.continents:
@@ -252,6 +254,13 @@ class World:
             height_map.paste(h_map, (x - r + width, y - r), h_map)
             mask.paste(m, (x - r - width, y - r), m)
             height_map.paste(h_map, (x - r - width, y - r), h_map)
+            
+            # Add a red dot to the mask to indicate the center of the continent
+            # draw = ImageDraw.Draw(mask)
+            # draw.ellipse(
+            #     (x - scale, y - scale, x + scale, y + scale),
+            #     fill=(255, 0, 0)
+            # )
         
         return mask, height_map
             

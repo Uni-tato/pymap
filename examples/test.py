@@ -4,12 +4,12 @@ from continent import Continent
 from world import World
 from consts import *
 
-w = World('Testworld')
+# w = World('Testworld')
 
 # c1 = Continent('Testmerica', 2200)
 # c2 = Continent('Testope', 1800)
 # c3 = Continent('Testralia', 1600)
-c4 = Continent('Testfrica', 3100)
+# c4 = Continent('Testfrica', 3100)
 
 # w.add_continent(c1)
 # w.add_continent(c2)
